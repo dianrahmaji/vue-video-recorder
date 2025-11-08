@@ -4,6 +4,14 @@
 
     <section class="controls">
       <label>
+        Camera
+        <select v-model="facing" :disabled="isRecording">
+          <option value="environment">Back Camera</option>
+          <option value="user">Front Camera</option>
+        </select>
+      </label>
+
+      <label>
         Quality / FPS
         <select v-model="selected" :disabled="isRecording">
           <option v-for="(opt, key) in options" :key="key" :value="key">
@@ -64,6 +72,9 @@ const remaining = ref<number>(timerSeconds.value)
 const isRecording = ref(false)
 const previewEl = ref<HTMLVideoElement | null>(null)
 
+// Add facing ref
+const facing = ref<'environment' | 'user'>('environment')
+
 let mediaStream: MediaStream | null = null
 let recorder: MediaRecorder | null = null
 let chunks: Blob[] = []
@@ -79,7 +90,10 @@ watch(timerSeconds, (v) => {
 })
 
 function buildConstraints() {
-  const video = options[selected.value]!.constraints
+  const video = {
+    ...options[selected.value]!.constraints,
+    facingMode: { ideal: facing.value }
+  }
   return { audio: true, video }
 }
 
